@@ -6,8 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NEST" Version="7.9.0" />
+    <PackageReference Include="NLog" Version="4.7.4" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.3" />
     <PackageReference Include="VueCliMiddleware" Version="3.0.0" />
   </ItemGroup>
 
+  <Target Name="client-app" BeforeTargets="ComputeFilesToPublish">
+    <Exec Command="npm install" WorkingDirectory="client-app"></Exec>
+    <Exec Command="npm run build" WorkingDirectory="client-app"></Exec>
+  </Target>
 
 </Project>

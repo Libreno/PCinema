@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog.Web;
 
 namespace PCinema.Web
 {
@@ -13,7 +14,20 @@ namespace PCinema.Web
 	{
 		public static void Main(string[] args)
 		{
-			CreateHostBuilder(args).Build().Run();
+			var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+			try
+			{
+				logger.Debug("init main");
+				CreateHostBuilder(args).Build().Run();
+			}
+			catch (Exception e) {
+				logger.Error(e, "Stopped program because of exception");
+				throw;
+			}
+			finally
+			{
+				NLog.LogManager.Shutdown();
+			}
 		}
 
 		public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -21,6 +35,12 @@ namespace PCinema.Web
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
 					webBuilder.UseStartup<Startup>();
-				});
+				})
+				.ConfigureLogging(logging =>
+				{
+					logging.ClearProviders();
+					logging.SetMinimumLevel(LogLevel.Trace);
+				})
+				.UseNLog();
 	}
 }

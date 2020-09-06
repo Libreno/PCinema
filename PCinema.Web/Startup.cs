@@ -25,6 +25,10 @@ namespace PCinema.Web
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			var elasticHost = Configuration.GetValue<string>("elasticHost");
+			var elasticUser = Configuration.GetValue<string>("elasticUser");
+			var elasticPassw = Configuration.GetValue<string>("elasticPassw");
+			services.AddTransient(sp => new SearchRepository(elasticHost, elasticUser, elasticPassw, sp.GetService<ILogger<SearchRepository>>()));
 			services.AddControllers();
 			services.AddSpaStaticFiles(configuration =>
 			{
