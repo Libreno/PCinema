@@ -41,11 +41,11 @@ namespace PCinema.Web.Controllers
 
 		// POST api/<DataController>/addentry
 		[HttpPost]
-		public IActionResult AddEntry([FromBody] Person entry)
+		public IActionResult AddEntry([ModelBinder(Name = "fullText")] Person entry)
 		{
 			try
 			{
-				logger.LogInformation("AddEntry " + JsonSerializer.Serialize(entry));
+				logger.LogInformation("AddEntry " + entry.FullText);
 				var res = repo.AddEntry(entry);
 				switch (res.Result)
 				{
@@ -78,7 +78,7 @@ namespace PCinema.Web.Controllers
 			{
 				logger.LogInformation("Search " + query);
 				var res = repo.Search(query);
-				return new OkObjectResult(res);
+				return new OkObjectResult(res.Documents);
 			}
 			catch (Exception e)
 			{

@@ -28,7 +28,7 @@ namespace PCinema.Web
 
 		public ISearchResponse<Person> Search(string query)
 		{
-			var res = client.Search<Person>(s => s.Query(q => q.Match(m => m.Field(f => f.Bio).Query(query))));
+			var res = client.Search<Person>(s => s.Query(q => q.Match(m => m.Field(f => f.FullText).Query(query))));
 			logger.LogInformation("Search result: " + JsonSerializer.Serialize(res.Documents));
 			return res;
 		}

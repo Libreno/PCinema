@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PCinema.Web.Controllers;
 using VueCliMiddleware;
 
 namespace PCinema.Web
@@ -29,7 +30,9 @@ namespace PCinema.Web
 			var elasticUser = Configuration.GetValue<string>("elasticUser");
 			var elasticPassw = Configuration.GetValue<string>("elasticPassw");
 			services.AddTransient(sp => new SearchRepository(elasticHost, elasticUser, elasticPassw, sp.GetService<ILogger<SearchRepository>>()));
-			services.AddControllers();
+			services.AddControllers(options => {
+				options.ModelBinderProviders.Insert(0, new PersonEntityBinderProvider());
+			});
 			services.AddSpaStaticFiles(configuration =>
 			{
 				configuration.RootPath = "ClientApp";

@@ -6,7 +6,11 @@
         <b-button type="submit" variant="primary" @onClick="onSubmit">Search</b-button>
       </form>
       <div id="search-results" class="mt-2">
-
+        <div v-bind:key="person.id" v-for="person in searchResults">
+          <div v-bind:key="field.id" v-for="field in person.fields">
+            {{field.name}}: {{field.value}}
+          </div>
+          </div>
       </div>
     </b-overlay>
 </template>
@@ -19,7 +23,8 @@
       return {
         searchString: '',
         error: '',
-        showSpinner: false
+        showSpinner: false,
+        searchResults: []
       }
     },
     computed: {
@@ -35,7 +40,20 @@
         this.showSpinner = true;
         axios.get('/api/data/search', { params: { query: this.searchString }})
           .then(resp => {
-            console.log(resp);
+            this.searchResults = resp.data.map((v, i) => {
+              let person = JSON.parse(v.fullText);
+              return {
+                id: i,
+                fields: Object.entries(person).map((e, i) => {
+                  return {
+                    id: i,
+                    name: e[0],
+                    value: e[1]
+                  }
+                })
+              };
+            });
+            console.log(this.searchResults);
           })
           .catch(err => {
             this.error = err.toString();
