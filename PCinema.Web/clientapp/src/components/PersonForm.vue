@@ -1,7 +1,7 @@
 ﻿<template>
   <b-overlay :show="showSpinner" rounded="sm">
     <b-alert :show="alertShow" variant="danger">{{error}}</b-alert>
-    <b-form @submit.stop.prevent="onSubmit">
+    <b-form @submit.stop.prevent="onSubmit" v-if="showForm">
       <b-form-group id="form-name-group"
                     label-cols-lg="2"
                     label="Full name:"
@@ -93,10 +93,16 @@
           <b-form-checkbox value="composer" inline>Composer</b-form-checkbox>
           <b-form-checkbox value="film_editor" inline>Film editor</b-form-checkbox>
         </b-form-checkbox-group>
-        <div id="input-professions-feedback" v-if="$v.form.professions.$error" class="pc-error-message">This is a required field.</div>
+        <div id="input-professions-feedback" 
+             v-if="$v.form.professions.$error" 
+             class="pc-error-message">This is a required field.</div>
       </b-form-group>
       <b-button type="submit" variant="primary" @onClick="onSubmit">Submit</b-button>
     </b-form>
+    <div v-if="!showForm">
+      <b-alert variant="success" show>Record added successfully.</b-alert>
+      <b-button type="submit" @click="addMoreClick" variant="primary" class="pc-add-more-button">Add more</b-button>
+    </div>
   </b-overlay>
 </template>
 
@@ -121,6 +127,7 @@
         maxDate: new Date(),
         error: '',
         showSpinner: false,
+        showForm: true
       }
     },
     validations: {
@@ -148,7 +155,7 @@
     computed: {
       alertShow() {
         return Boolean(this.error !== undefined && this.error.length > 0);
-      },
+      }
     },
     methods: {
       validateState(name) {
@@ -179,12 +186,7 @@
         axios.post('/api/data/addentry', this.form)
           .then(resp => {
             console.log(resp);
-            this.$bvModal.msgBoxOk("Saved successfully.", {
-              title: 'Info',
-              size: 'sm',
-              buttonSize: 'sm',
-              okVariant: 'success'
-            });
+            this.showForm = false;
             this.resetForm();
           })
           .catch(err => {
@@ -194,6 +196,9 @@
           .finally(() => {
             this.showSpinner = false;
           })
+      },
+      addMoreClick() {
+        this.showForm = true;
       }
     }
   }
@@ -216,6 +221,9 @@
   }
   label {
     text-align: left;
+  }
+  .pc-add-more-button {
+    margin-top: 15px;
   }
   @media (min-width:1024px) {
     #form-sex-group label {

@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Elasticsearch.Net;
+using Microsoft.Extensions.Logging;
 using Nest;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -26,11 +29,37 @@ namespace PCinema.Web
 			return indexResponse;
 		}
 
-		public ISearchResponse<Person> Search(string query)
+		public IEnumerable<ResultItem> Search(string query)
 		{
-			var res = client.Search<Person>(s => s.Query(q => q.Match(m => m.Field(f => f.FullText).Query(query))));
+			var res = client.Search<Person>(s =>
+				s.Query(q =>
+					q.Match(m =>
+						m.Field(f =>
+							f.FullText)
+						.Query(query)))
+				.Highlight(h =>
+					h.HighlightQuery(q => q
+						.Match(m => m
+							.Field(f =>
+							f.FullText)
+						.Query(query))
+					)
+					.Fields(
+						fs => fs
+							.Field(f => f.FullText)
+						)
+					));
+
 			logger.LogInformation("Search result: " + JsonSerializer.Serialize(res.Documents));
-			return res;
+			var list = new List<ResultItem>();
+			var hits = res.Hits.ToArray();
+			var i = 0;
+			foreach (var doc in res.Documents)
+			{
+				list.Add(new ResultItem() { FullText = doc.FullText, Highlights = hits[i].Highlight.Single().Value.ToArray() });
+				i++;
+			};
+			return list;
 		}
 	}
 }

@@ -76,9 +76,12 @@ namespace PCinema.Web.Controllers
 		{
 			try
 			{
-				logger.LogInformation("Search " + query);
+				logger.LogInformation("Search '" + query + "'");
+				if (string.IsNullOrWhiteSpace(query)) {
+					return new OkObjectResult(new List<ResultItem>());
+				};
 				var res = repo.Search(query);
-				return new OkObjectResult(res.Documents);
+				return new OkObjectResult(res);
 			}
 			catch (Exception e)
 			{

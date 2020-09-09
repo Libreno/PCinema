@@ -5,7 +5,7 @@
         <b-tab title="New person info" active :title-link-class="linkClass(0)">
           <PersonForm />
         </b-tab>
-        <b-tab title="Search" :title-link-class="linkClass(1)">
+        <b-tab title="Search data" :title-link-class="linkClass(1)">
           <SearchForm />
         </b-tab>
       </b-tabs>
