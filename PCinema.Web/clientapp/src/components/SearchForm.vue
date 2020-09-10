@@ -1,12 +1,18 @@
 ﻿<template>
     <b-overlay :show="showSpinner" rounded="sm">
-      <b-alert :show="alertShow" variant="danger">{{error}}</b-alert>
+      <b-alert :show="showAlert" variant="danger">{{error}}</b-alert>
       <form class="pc-search-form" @submit.stop.prevent="onSubmit">
         <input type="text" v-model="searchString"/>
         <b-button type="submit" variant="primary" @onClick="onSubmit">Search</b-button>
       </form>
       <div id="search-results" class="mt-2 pc-search-results">
-        <div v-bind:key="person.id" v-for="person in searchResults">
+        <b-alert :show="nothingFound" variant="info">Matches not found.</b-alert>
+        <b-pagination v-model="currentPage"
+                      :total-rows="itemsTotalCount"
+                      :per-page="itemsPerPage"
+                      @change="pageChange"
+                      v-if="itemsTotalCount > itemsPerPage"></b-pagination>
+        <b-card v-bind:key="person.id" v-for="person in searchItemsOnPage">
           <div v-bind:key="field.id" v-for="field in person.fields.slice(0, 1)">
             <h4>{{field.value}}</h4>
           </div>
@@ -28,19 +34,24 @@
                   </li>
                 </ul>
               </div>
-              <span v-if="!Array.isArray(field.value)">
+              <span v-else>
                 {{field.value}}
               </span>
             </div>
             <b>Matches:</b>
-            <ul>
+            <ol>
               <li v-bind:key="highlight.id"
-                   v-for="highlight in person.highlights"
-                   v-html="highlight.text">
+                  v-for="highlight in person.highlights"
+                  v-html="highlight.text">
               </li>
-            </ul>
+            </ol>
           </b-collapse>
-        </div>
+        </b-card>
+        <b-pagination v-model="currentPage"
+                      :total-rows="itemsTotalCount"
+                      :per-page="itemsPerPage"
+                      @change="pageChange"
+                      v-if="itemsTotalCount > itemsPerPage"></b-pagination>
       </div>
     </b-overlay>
 </template>
@@ -54,13 +65,20 @@
         searchString: '',
         error: '',
         showSpinner: false,
-        searchResults: []
+        searchItemsOnPage: [],
+        allSearchItems: [],
+        itemsPerPage: 5,
+        currentPage: 1,
+        itemsTotalCount: null
       }
     },
     computed: {
-      alertShow() {
+      showAlert() {
         return Boolean(this.error !== undefined && this.error.length > 0);
       },
+      nothingFound() {
+        return this.itemsTotalCount === 0;
+      }
     },
     methods: {
       onSubmit() {
@@ -68,12 +86,13 @@
           return;
         }
         this.showSpinner = true;
-        this.searchResults = [];
+        this.searchItemsOnPage = [];
         this.error = '';
         axios.get('/api/data/search', { params: { query: this.searchString }})
           .then(resp => {
-            console.log(resp);
-            this.searchResults = resp.data.map((v, i) => {
+            this.itemsTotalCount = resp.data.length;
+            this.currentPage = 1;
+            this.allSearchItems = resp.data.map((v, i) => {
               let person = JSON.parse(v.fullText);
               return {
                 id: "person" + i,
@@ -92,7 +111,7 @@
                 })
               };
             });
-            console.log(this.searchResults);
+            this.searchItemsOnPage = this.allSearchItems.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
           })
           .catch(err => {
             this.error = err.toString();
@@ -101,6 +120,9 @@
           .finally(() => {
             this.showSpinner = false;
           })
+      },
+      pageChange(page) {
+        this.searchItemsOnPage = this.allSearchItems.slice((page - 1) * this.itemsPerPage, page * this.itemsPerPage);
       }
     }
   }
@@ -128,6 +150,9 @@
     color: #17a2b8;
   }
   #search-results h4 {
+    margin-top: 15px;
+  }
+  #search-results .b-pagination {
     margin-top: 15px;
   }
 </style>

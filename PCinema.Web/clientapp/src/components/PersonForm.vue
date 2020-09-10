@@ -1,6 +1,6 @@
 ﻿<template>
   <b-overlay :show="showSpinner" rounded="sm">
-    <b-alert :show="alertShow" variant="danger">{{error}}</b-alert>
+    <b-alert :show="showAlert" variant="danger">{{error}}</b-alert>
     <b-form @submit.stop.prevent="onSubmit" v-if="showForm">
       <b-form-group id="form-name-group"
                     label-cols-lg="2"
@@ -153,7 +153,7 @@
       }
     },
     computed: {
-      alertShow() {
+      showAlert() {
         return Boolean(this.error !== undefined && this.error.length > 0);
       }
     },
@@ -182,10 +182,8 @@
           return;
         }
         this.showSpinner = true;
-        console.log(JSON.stringify(this.form));
         axios.post('/api/data/addentry', this.form)
-          .then(resp => {
-            console.log(resp);
+          .then(() => {
             this.showForm = false;
             this.resetForm();
           })

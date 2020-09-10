@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Elasticsearch.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -22,21 +18,6 @@ namespace PCinema.Web.Controllers
 		{
 			this.logger = logger;
 			this.repo = repo;
-		}
-
-		// GET: api/<DataController>/get
-		[HttpGet]
-		public IEnumerable<string> Get()
-		{
-			logger.LogInformation("api/data requested");
-			return new string[] { "value1", "value2" };
-		}
-
-		// GET api/<DataController>/5
-		[HttpGet("{id}")]
-		public string Get(int id)
-		{
-			return "value";
 		}
 
 		// POST api/<DataController>/addentry
@@ -91,12 +72,6 @@ namespace PCinema.Web.Controllers
 					ContentType = "text/plain"
 				};
 			}
-		}
-
-		// DELETE api/<DataController>/5
-		[HttpDelete("{id}")]
-		public void Delete(int id)
-		{
 		}
 	}
 }
