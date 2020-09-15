@@ -9,14 +9,13 @@ namespace PCinema.Web
 {
 	public class PersonEntityBinder : IModelBinder
 	{
-		public Task BindModelAsync(ModelBindingContext bindingContext)
+		public async Task BindModelAsync(ModelBindingContext bindingContext)
 		{
 			var request = bindingContext.HttpContext.Request;
-			var ms = new MemoryStream();
-			request.Body.CopyToAsync(ms).Wait();
+			using var ms = new MemoryStream();
+			await request.Body.CopyToAsync(ms);
 			var model = new Person() { FullText = Encoding.UTF8.GetString(ms.ToArray()) };
 			bindingContext.Result = ModelBindingResult.Success(model);
-			return Task.CompletedTask;
 		}
 	}
 }
